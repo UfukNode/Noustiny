@@ -1,0 +1,250 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+/* Custom cursor — Cursor.tsx renders the SVG; the native one is hidden
+ * here.  Pointer-only fine devices (mouse-driven) get the swap; touch
+ * devices keep their native cursor (which they don't render anyway). */
+@media (pointer: fine) {
+  html, body, * { cursor: none !important; }
+}
+
+:root {
+  --bg-0: #0a0d12;
+  --bg-1: #0f131b;
+  --bg-2: #151a24;
+  --line: #1e2633;
+  --ink: #e6ecf4;
+  --ink-dim: #8a96aa;
+  --ink-faint: #4a5466;
+
+  --cyan: #4fc3f7;
+  --cyan-glow: rgba(79, 195, 247, 0.55);
+  --cyan-soft: rgba(79, 195, 247, 0.12);
+
+  --gold: #e9c16b;
+  --gold-glow: rgba(233, 193, 107, 0.5);
+
+  --red: #e74c3c;
+  --red-glow: rgba(231, 76, 60, 0.5);
+
+  /* Edge palette — semantic states read at a glance.  Four tiers:
+   *
+   *   canon      (cyan)        active story spine
+   *   hover      (gold)        any hovered target (speculative preview)
+   *   explored   (mid grey)    walked but off current canon
+   *   unvisited  (dim)         never walked, dashed hairline
+   *
+   * Dim tiers are tuned to stay legible on ALL dark-family backdrops
+   * (nebula gradients, dot grids, void) — not just the near-black
+   * Detroit·Dark — so the flowchart doesn't vanish when the user
+   * switches to an ambient-textured preset. */
+  --edge-canon: #4fc3f7;
+  --edge-canon-glow: rgba(79, 195, 247, 0.55);
+  --edge-hover: #e9c16b;
+  --edge-hover-glow: rgba(233, 193, 107, 0.6);
+  --edge-explored: #7a8699;
+  --edge-unvisited: #7a8aa4;
+
+  /* Surface tokens — translucent panels.  These wrap every dialog /
+   * input / card chrome so the day/night flip swaps all of them in
+   * one pass instead of chasing every hardcoded rgba. */
+  --surface-panel:        rgba(15, 19, 27, 0.70);
+  --surface-inset:        rgba(15, 19, 27, 0.50);
+  --surface-hi:           rgba(10, 13, 18, 0.96);
+  --surface-accent:       rgba(79, 195, 247, 0.08);
+  --surface-accent-hover: rgba(79, 195, 247, 0.18);
+  --surface-accent-ink:   rgba(79, 195, 247, 0.14);
+  --surface-accent-soft:  rgba(79, 195, 247, 0.06);
+}
+
+@theme inline {
+  --color-background: var(--bg-0);
+  --color-foreground: var(--ink);
+  --font-display: var(--font-saira);
+  --font-mono: var(--font-jetbrains);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: var(--font-saira), system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* Light-family theme flip — governed by `data-theme` on <body>, which
+ * is derived from the current background preset in app/page.tsx.
+ * Supporting `data-bg="detroit-light"` too for backwards-compatibility
+ * with any cached client state. */
+body[data-theme="light"],
+body[data-bg="detroit-light"] {
+  --bg-0: #dee1e6;
+  --bg-1: #e8ebef;
+  --bg-2: #f0f2f5;
+  --line: rgba(0,0,0,0.14);
+  --ink: #1b2432;
+  --ink-dim: #44566e;
+  --ink-faint: #8491a6;
+  --cyan: #1794d6;
+  --cyan-glow: rgba(23,148,214,0.45);
+  --gold: #d69a2d;
+  --gold-glow: rgba(214, 154, 45, 0.55);
+
+  /* Edge palette — day variants.  On a light backdrop darker tones
+   * carry the weight: the dim tiers (explored / unvisited) go near
+   * black so they stay visible against near-white bg.  Canon + hover
+   * stay saturated for pop. */
+  --edge-canon: #1684c0;
+  --edge-canon-glow: rgba(22, 132, 192, 0.55);
+  --edge-hover: #b9821c;
+  --edge-hover-glow: rgba(185, 130, 28, 0.55);
+  --edge-explored: #2f3a4c;
+  --edge-unvisited: rgba(20, 28, 42, 0.78);
+
+  /* Surface tokens — translucent panels on a paper bg.  Pale whites
+   * with enough alpha to read as surfaces (otherwise they dissolve
+   * into the backdrop and lose their chrome). */
+  --surface-panel:        rgba(255, 255, 255, 0.82);
+  --surface-inset:        rgba(255, 255, 255, 0.64);
+  --surface-hi:           rgba(255, 255, 255, 0.96);
+  --surface-accent:       rgba(22, 132, 192, 0.10);
+  --surface-accent-hover: rgba(22, 132, 192, 0.20);
+  --surface-accent-ink:   rgba(22, 132, 192, 0.14);
+  --surface-accent-soft:  rgba(22, 132, 192, 0.06);
+}
+
+.react-flow { background: transparent; }
+.react-flow__background { background-color: transparent; }
+.react-flow__edge-path { stroke-width: 1.5; }
+
+.react-flow__edge.canon .react-flow__edge-path {
+  stroke: var(--edge-canon);
+  stroke-width: 1.9;
+  filter: drop-shadow(0 0 5px var(--edge-canon-glow));
+}
+.react-flow__edge.explored .react-flow__edge-path {
+  stroke: var(--edge-explored); stroke-width: 1.3;
+}
+.react-flow__edge.unvisited .react-flow__edge-path {
+  stroke: var(--edge-unvisited); stroke-width: 1.4; stroke-dasharray: 4 4;
+}
+
+.react-flow__handle { opacity: 0; pointer-events: none; }
+
+.react-flow__controls {
+  background: rgba(15, 19, 27, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  backdrop-filter: blur(10px);
+}
+.react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-dim);
+  border-radius: 0;
+}
+.react-flow__controls-button:hover {
+  background: rgba(79, 195, 247, 0.08);
+  color: var(--cyan);
+}
+.react-flow__controls-button svg { fill: currentColor; }
+
+.react-flow__minimap {
+  background: rgba(15, 19, 27, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--line); }
+::-webkit-scrollbar-thumb:hover { background: #2d3748; }
+
+.detroit-card {
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.05));
+}
+.detroit-card-inner {
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+
+@keyframes pulse-dim {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+.pulse-dim { animation: pulse-dim 2.4s ease-in-out infinite; }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.scan-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(79, 195, 247, 0.18), transparent);
+  animation: scan 2.2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Shimmer sweep used by insert shells (compact what-if bar while
+   Hermes writer-assist runs).  The gradient is authored at 220%
+   width so translating backgroundPosition from 100% → -100% walks
+   a single highlight band across the element once per cycle. */
+@keyframes shellShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.caret {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: var(--cyan);
+  margin-left: 2px;
+  animation: blink 0.9s step-end infinite;
+  vertical-align: middle;
+}
+
+.corner-brackets { position: relative; }
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--cyan);
+  opacity: 0.85;
+}
+.corner-brackets::before {
+  top: -4px; left: -4px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+.corner-brackets::after {
+  bottom: -4px; right: -4px;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+/* Active-beat marker — used on the current checkpoint card.  Two
+ * chevrons (above + below) plus four corner brackets read as a
+ * Detroit-style "you are here" indicator.  Chevrons breathe gently
+ * toward and away from the card.  Colour comes from var(--cyan),
+ * which auto-swaps with the day/night theme. */
+@keyframes activeBeatBounceTop {
+  0%, 100% { transform: translateY(-10px); }
+  50%      { transform: translateY(2px); }
+}
+@keyframes activeBeatBounceBottom {
+  0%, 100% { transform: translateY(10px); }
+  50%      { transform: translateY(-2px); }
+}

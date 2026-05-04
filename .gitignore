@@ -1,0 +1,63 @@
+# IDE / editor metadata
+.idea/
+.vscode/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build output (per-app .gitignore already covers it, kept here for safety)
+**/.next/
+**/out/
+**/build/
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Env files — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Local scratch / working notes
+chat.md
+divergence.html
+
+# Storybook render output — generated mp4s are large and reproducible.
+web/public/cache/storybook/
+
+# Image-gen cache — content-addressable (SHA256-named); regenerable from
+# the image API on demand, so checking thousands of jpegs into git just
+# bloats the repo with replayable output.
+web/public/cache/images/
+web/public/cache/_*.png
+
+# User-uploaded voice reference clips — private user content, not part
+# of the public repo.
+web/public/cache/voice_uploads/
+
+# Hermes skills local mirror — copied from WSL canonical path on demand
+# (see web/CLAUDE.md), not source of truth.
+hermes-skills-local/
+
+# Filesystem-mirrored story saves (port-independent backup of localStorage saves).
+web/.saves/
+
+# Claude Code workspace
+.claude/
+
+# Internal dev / planning notes — kept local, not part of the public repo.
+# CLAUDE.md / AGENTS.md hold project-specific AI assistant instructions
+# (architecture nudges, working state); demo-start.md is recording prep.
+web/CLAUDE.md
+web/AGENTS.md
+demo-start.md
+*PLAN.md
+*MEMORY.md
+*ISSUES_TRACKER.md
